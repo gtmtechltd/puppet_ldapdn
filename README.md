@@ -23,7 +23,7 @@ First you might like to set a root password:
 ```puppet
 ldapdn{"add manager password":
   dn => "olcDatabase={2}bdb,cn=config",
-  attributes => "olcRootPW: password",
+  attributes => ["olcRootPW: password"],
   unique_attributes => ["olcRootPW"],
   ensure => present,
 }
