@@ -1,5 +1,5 @@
-puppet_ldapn
-============
+puppet_ldapdn
+=============
 
 puppet_ldapdn is a puppet type and provider that aims to simply manage newer slapd.d style openldap entries via ldapmodify and ldapadd commands. This is much more preferable than writing files directly to the slapd.d database.
 
