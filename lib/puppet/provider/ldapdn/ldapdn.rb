@@ -140,7 +140,7 @@ Puppet::Type.type(:ldapdn).provide :ldapdn do
     ldapsearch_output.split(/\r?\n(?!\s)/).each do |line|
       line.gsub!(/[\r\n] /, '')
       line.gsub!(/\r?\n?$/, '')
-      current_key,current_value = line.split(': ', 2)
+      current_key,current_value = line.split(/:+ /, 2)
       found_keys << current_key
       if asserted_attributes.key?(current_key)
         same_as_an_asserted_value = false
