@@ -34,16 +34,18 @@ unique_attributes can be used to specify the behaviour of ldapmodify when there 
 
 ```puppet
 $organizational_units = ["Groups", "People", "Programs"]
-ldap::add_organizational_unit{ $organizational_units }
+ldap::add_organizational_unit{ $organizational_units: }
 
 define ldap::add_organizational_unit () {
 
-ldapdn{ "ou ${name}":
-  dn => "ou=${name},dc=example,dc=com",
-  attributes => [ "ou: ${name}",
-                  "objectClass: organizationalUnit" ],
-  unique_attributes => ["ou"],
-  ensure => present,
+  ldapdn{ "ou ${name}":
+    dn => "ou=${name},dc=example,dc=com",
+    attributes => [ "ou: ${name}",
+                    "objectClass: organizationalUnit" ],
+    unique_attributes => ["ou"],
+    ensure => present,
+  }
+
 }
 ```
 
