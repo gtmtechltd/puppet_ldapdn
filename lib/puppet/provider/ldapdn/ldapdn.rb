@@ -102,7 +102,8 @@ Puppet::Type.type(:ldapdn).provide :ldapdn do
     command = [command(:ldapsearchcmd), "-QY", "EXTERNAL", "-H", "ldapi:///", "-b", resource[:dn], "-s", "base", "-LLL", "-d", "0"]
     begin
       ldapsearch_output = execute(command)
-      Puppet.debug(ldapsearch_output)
+      Puppet.debug("ldapdn >>\n#{to_json2(asserted_attributes)}")
+      Puppet.debug("ldapsearch >>\n#{ldapsearch_output}")
     rescue Puppet::ExecutionFailure => ex
       if ex.message.scan '/No such object (32)/'
         Puppet.debug("Could not find object: #{resource[:dn]}")
@@ -143,16 +144,19 @@ Puppet::Type.type(:ldapdn).provide :ldapdn do
       current_key,current_value = line.split(/:+ /, 2)
       found_keys << current_key
       if asserted_attributes.key?(current_key)
+        Puppet.debug("search() #{current_key}: #{current_value}")
         same_as_an_asserted_value = false
         asserted_attributes[current_key].each do |asserted_value|
-          Puppet.debug("checking: >#{current_value}< against >#{asserted_value}<")
+          Puppet.debug("check() #{current_key}: #{current_value}  <===>  #{current_key}: #{asserted_value}")
           same_as_an_asserted_value = true if asserted_value == current_value
+          same_as_an_asserted_value = true if asserted_value.clone.gsub(/^\{.*?\}/, "") == current_value.clone.gsub(/^\{.*?\}/, "")
         end
-        Puppet.debug("found: #{current_key}: #{current_value} (#{same_as_an_asserted_value})")
         if same_as_an_asserted_value
+          Puppet.debug("asserted and found: #{current_key}: #{current_value}")
           work_to_do[current_key] << [ :delete ] if resource[:ensure] == :absent
-          found_attributes[current_key] << current_value 
+          found_attributes[current_key] << current_value.clone.gsub(/^\{.*?\}/, "")
         else
+          Puppet.debug("not asserted: #{current_key}: #{current_value}")
           work_to_do[current_key] << [ :replace ] if resource[:ensure] == :present \
                                                  and unique_attributes.include?(current_key) \
                                                  and !indifferent_attributes.include?(current_key)
@@ -163,8 +167,10 @@ Puppet::Type.type(:ldapdn).provide :ldapdn do
     asserted_attributes.each do |asserted_key, asserted_values|
       asserted_values.each do |asserted_value|
         
+        Puppet.debug("assert() #{asserted_key}: #{asserted_value}")
+        
         if resource[:ensure] == :present
-          work_to_do[asserted_key] << [ :add, asserted_value ] unless found_attributes[ asserted_key ].include?(asserted_value) \
+          work_to_do[asserted_key] << [ :add, asserted_value ] unless found_attributes[ asserted_key ].include?(asserted_value.clone.gsub(/^\{.*?\}/, "")) \
                                                                    or (found_keys.include?(asserted_key) and indifferent_attributes.include?(asserted_key))                                                                      
         end
 
@@ -183,18 +189,6 @@ Puppet::Type.type(:ldapdn).provide :ldapdn do
         
   end
   
-  def ldapmodify()
-    command = "ldapmodify -QY EXTERNAL -H ldapi:///"
-    changerecord = ""
-        
-    file = ""
-    # output = execute(command)
-  end
-  
-  
-  def ldaprun()
-    # create_temporary_file
-  end
   
   def to_json2(stringin)
     
