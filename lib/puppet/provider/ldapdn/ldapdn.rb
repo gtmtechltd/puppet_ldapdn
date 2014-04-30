@@ -7,18 +7,18 @@ Puppet::Type.type(:ldapdn).provide :ldapdn do
   commands :ldapmodifycmd => "/usr/bin/ldapmodify"
   commands :ldapaddcmd => "/usr/bin/ldapadd"
   commands :ldapsearchcmd => "/usr/bin/ldapsearch"
-  
+
   def create()
     ldap_apply_work
   end
-  
+
   def destroy()
     ldap_apply_work
   end
-  
+
   def exists?()
     @work_to_do = ldap_work_to_do(parse_attributes)
-    
+
     # This is a bit of a butchery of an exists? method which is designed to return yes or no,
     # Whereas we are editing a multi-faceted record, and it might be in a semi-desired state.
     # However, as I want to still use the ensure() param, I will have to live within its rules
@@ -32,9 +32,9 @@ Puppet::Type.type(:ldapdn).provide :ldapdn do
     end
 
   end
-  
+
   def parse_attributes
-    
+
     ldap_attributes = {}
     Array(resource[:attributes]).each do |asserted_attribute|
       key,value = asserted_attribute.split(':', 2)
@@ -42,7 +42,7 @@ Puppet::Type.type(:ldapdn).provide :ldapdn do
       ldap_attributes[key] << value.strip!
     end
     ldap_attributes
-    
+
   end
 
   def ldap_apply_work
@@ -50,9 +50,9 @@ Puppet::Type.type(:ldapdn).provide :ldapdn do
 
       modify_record = []
       modify_record << "dn: #{resource[:dn]}"
-      
+
       modify_record << "changetype: modify" if modify_type == :ldapmodify
-      
+
       modifications.each do |attribute, instructions|
         add_type="add"
         instructions.each do |instruction|
@@ -70,19 +70,19 @@ Puppet::Type.type(:ldapdn).provide :ldapdn do
           end
         end
       end
-      
+
       ldif = Tempfile.open("ldap_apply_work")
       ldif_file = ldif.path
       ldif.write modify_record.join("\n")
       ldif.close
-      
+
       cmd = case modify_type
       when :ldapmodify
         :ldapmodifycmd
       when :ldapadd
         :ldapaddcmd
       end
-      
+
       begin
         command = [command(cmd), "-QY", "EXTERNAL", "-H", "ldapi:///", "-d", "0", "-f", ldif_file]
         Puppet.debug("\n\n" + File.open(ldif_file, 'r') { |file| file.read })
@@ -95,9 +95,9 @@ Puppet::Type.type(:ldapdn).provide :ldapdn do
       end
 
     end
-         
+
   end
-  
+
   def ldap_work_to_do(asserted_attributes)
     command = [command(:ldapsearchcmd), "-QY", "EXTERNAL", "-H", "ldapi:///", "-b", resource[:dn], "-s", "base", "-LLL", "-d", "0"]
     begin
@@ -120,24 +120,24 @@ Puppet::Type.type(:ldapdn).provide :ldapdn do
         return { :ldapadd => work_to_do }
       else
         raise ex
-      end      
+      end
     end
-    
+
     unique_attributes = resource[:unique_attributes]
     unique_attributes = [] if unique_attributes.nil?
-    
+
     indifferent_attributes = resource[:indifferent_attributes]
     indifferent_attributes = [] if indifferent_attributes.nil?
-    
+
     work_to_do = {}
     found_attributes = {}
     found_keys = []
-    
+
     asserted_attributes.each do |asserted_key, asserted_value|
       work_to_do[asserted_key] = []
       found_attributes[asserted_key] = []
     end
-    
+
     ldapsearch_output.split(/\r?\n(?!\s)/).each do |line|
       line.gsub!(/[\r\n] /, '')
       line.gsub!(/\r?\n?$/, '')
@@ -163,22 +163,22 @@ Puppet::Type.type(:ldapdn).provide :ldapdn do
         end
       end
     end
-    
+
     asserted_attributes.each do |asserted_key, asserted_values|
       asserted_values.each do |asserted_value|
-        
+
         Puppet.debug("assert() #{asserted_key}: #{asserted_value}")
-        
+
         if resource[:ensure] == :present
           work_to_do[asserted_key] << [ :add, asserted_value ] unless found_attributes[ asserted_key ].include?(asserted_value.clone.gsub(/^\{.*?\}/, "")) \
-                                                                   or (found_keys.include?(asserted_key) and indifferent_attributes.include?(asserted_key))                                                                      
+                                                                   or (found_keys.include?(asserted_key) and indifferent_attributes.include?(asserted_key))
         end
 
       end
     end
-    
+
     work_to_do.delete_if {|key, operations| operations.empty?}
-    
+
     if work_to_do.empty?
       Puppet.debug("conclusion: nothing to do")
       {}
@@ -186,12 +186,12 @@ Puppet::Type.type(:ldapdn).provide :ldapdn do
       Puppet.debug("conclusion: work to do: #{to_json2(work_to_do)}")
       { :ldapmodify => work_to_do }
     end
-        
+
   end
-  
-  
+
+
   def to_json2(stringin)
-    
+
     case stringin.class.to_s
     when "String"
       return "'" + stringin + "'"
@@ -212,8 +212,8 @@ Puppet::Type.type(:ldapdn).provide :ldapdn do
     else
       return "!OBJ(" + stringin.class.to_s + ":" + stringin.to_s + ")"
     end
-    return ""    
+    return ""
   end
-  
-    
+
+
 end
