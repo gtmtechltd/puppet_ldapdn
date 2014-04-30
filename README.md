@@ -84,7 +84,7 @@ ldapdn{"add database":
                  "o: example.com"],
   unique_attributes => ["dc", "o"],
   ensure => present,
-  auth_opts => "-xD cn=admin,dc=example,dc=com -w somePassword",
+  auth_opts => ["-xD", "cn=admin,dc=example,dc=com", "-w", "somePassword"],
 }
 ```
 
