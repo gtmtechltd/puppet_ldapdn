@@ -43,4 +43,8 @@ Puppet::Type.newtype(:ldapdn) do
     desc "Specify the value of the attribute you want to ldapmodify"
   end
 
+  newparam(:auth_opts) do
+    desc "Specify the options passed to ldapadd/ldapmodify for authentication. Defaults to -QY EXTERNAL."
+  end
+
 end

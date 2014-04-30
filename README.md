@@ -12,10 +12,6 @@ In essence the mechanism it uses is described as follows:
 * write out an appropriate ldif file
 * execute it via an ldapmodify statement.
 
-This puppet resource is currently in it's infancy and is capable of running successfully. However, it may need extending for your particular case as follows:
-
-* It uses the -Y EXTERNAL -H ldapi:/// SASL authentication mechanism. You may wish to bind specifically using an authorised dn, however this is on the todo list (or alternatively feel free to fork and submit)
-
 Examples of usage are as follows:
 
 First you might like to set a root password:
@@ -51,16 +47,19 @@ define ldap::add_organizational_unit () {
 
 In the above example, multiple groups are created. Notice in each case, that "objectClass" does not form part of the unique_attributes, so that (in future) more objectClasses may be added to each ou, without them being replaced.
 
-Here is how you can create a database in the first place:
+By default, all ldap commands are issued with the `-QY EXTERNAL` SASL auth mechanism. To deal with this, you might want to allow managing of the bdb database by this external mechanism, which then allows you to create a database without a "no write access to parent" error:
 
 ```puppet
-
 ldapdn{"set general access":
   dn => "olcDatabase={2}bdb,cn=config",
   attributes => ["olcAccess: {1}to * by self write by anonymous auth by dn.base="cn=Manager,dc=example,dc=com" write by dn.base="gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth" manage by * read"],
   ensure => present
-} ->
+}
+```
 
+Here is how you can create a database in the first place:
+
+```puppet
 ldapdn{"add database":
   dn => "dc=example,dc=com",
   attributes => ["dc: example",
@@ -73,7 +72,21 @@ ldapdn{"add database":
 }
 ```
 
-As mentioned, all ldap commands are issued with -Y EXTERNAL SASL auth mechanism. For this reason, the "set general access" ldapdn above allows managing of the bdb database to this external mechanism, which then allows you to create the database without a "no write access to parent" error.
+Additionally, you may need to specify alternative authentication options when managing resources:
+
+```puppet
+ldapdn{"add database":
+  dn => "dc=example,dc=com",
+  attributes => ["dc: example",
+                 "objectClass: top",
+                 "objectClass: dcObject",
+                 "objectClass: organization",
+                 "o: example.com"],
+  unique_attributes => ["dc", "o"],
+  ensure => present,
+  auth_opts => "-xD cn=admin,dc=example,dc=com -w somePassword",
+}
+```
 
 Sometimes you will want to ensure an attribute exists, but wont care about its subsequent value. An example of this is a password.
 
