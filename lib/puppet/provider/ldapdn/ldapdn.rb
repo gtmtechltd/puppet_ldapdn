@@ -23,13 +23,15 @@ Puppet::Type.type(:ldapdn).provide :ldapdn do
     # Whereas we are editing a multi-faceted record, and it might be in a semi-desired state.
     # However, as I want to still use the ensure() param, I will have to live within its rules
 
-    if @work_to_do.empty?
+    returnval = if @work_to_do.empty?
       true if resource[:ensure] == :present
       false if resource[:ensure] == :absent
     else
       false if resource[:ensure] == :present
       true if resource[:ensure] == :absent
     end
+
+    Puppet.debug("existing node? #{returnval}")
 
   end
 
