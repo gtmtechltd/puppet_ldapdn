@@ -88,6 +88,19 @@ ldapdn{"add database":
 }
 ```
 
+Optionally you can also now manage a remote ldap resources by adding the option remote_ldap and combining this with option auth_opts:
+
+```puppet
+  ldapdn{"adding_new_user":
+    dn => "cn=users,dc=mygroup",
+    attributes => ["member: cn=myteam,cn=myunit,dc=mygroup"],
+    ensure => present,
+    remote_ldap => "ldap1.example.com",
+    auth_opts => ["-xD", "cn=admin,cn=example,dc=com", "-w", "somePassword"],
+  }
+```
+
+
 Sometimes you will want to ensure an attribute exists, but wont care about its subsequent value. An example of this is a password.
 
 ```puppet
