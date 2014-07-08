@@ -84,7 +84,11 @@ Puppet::Type.type(:ldapdn).provide :ldapdn do
       end
 
       begin
-        command = [command(cmd), "-H", "ldapi:///", "-d", "0", "-f", ldif_file]
+        if resource[:remote_ldap]
+          command = [command(cmd), "-H", "ldap://#{resource[:remote_ldap]}", "-d", "0", "-f", ldif_file]
+        else
+          command = [command(cmd), "-H", "ldapi:///#{resource[:ldapi]}", "-d", "0", "-f", ldif_file]
+        end
         command += resource[:auth_opts] || ["-QY", "EXTERNAL"]
         Puppet.debug("\n\n" + File.open(ldif_file, 'r') { |file| file.read })
         output = execute(command)
@@ -100,7 +104,11 @@ Puppet::Type.type(:ldapdn).provide :ldapdn do
   end
 
   def ldap_work_to_do(asserted_attributes)
-    command = [command(:ldapsearchcmd), "-H", "ldapi:///", "-b", resource[:dn], "-s", "base", "-LLL", "-d", "0"]
+    if resource[:remote_ldap]
+      command = [command(:ldapsearchcmd), "-H", "ldap://#{resource[:remote_ldap]}", "-b", resource[:dn], "-s", "base", "-LLL", "-d", "0"]
+    else
+      command = [command(:ldapsearchcmd), "-H", "ldapi:///", "-b", resource[:dn], "-s", "base", "-LLL", "-d", "0"]
+    end
     command += resource[:auth_opts] || ["-QY", "EXTERNAL"]
     begin
       ldapsearch_output = execute(command)
