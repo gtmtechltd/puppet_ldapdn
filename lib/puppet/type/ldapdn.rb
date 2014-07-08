@@ -31,6 +31,10 @@ Puppet::Type.newtype(:ldapdn) do
     desc "Specify the attribute you want to ldapmodify"
   end
 
+  newparam(:remote_ldap) do
+    desc "Specify the remote ldap server"
+  end
+
   newparam(:unique_attributes, :array_matching => :all) do
     desc "Specify the attribute that are unique in the dn"
   end
