@@ -1,0 +1,13 @@
+{
+  "name": "gtmtechltd-ldapdn",
+  "version": "0.1.0",
+  "author": "Geoff Meakin",
+  "summary": "puppet type and provider to manage slapd.d style openldap entries via ldapmodify and ldapadd commands",
+  "license": "copyright free",
+  "source": "https://github.com/gtmtechltd/puppet_ldapdn",
+  "project_page": "(https://github.com/gtmtechltd/puppet_ldapdn)",
+  "issues_url": "https://github.com/gtmtechltd/puppet_ldapdn/issues",
+  "description": "puppet_ldapdn is a puppet type and provider that aims to simply manage newer slapd.d style openldap entries via ldapmodify and ldapadd commands. This is much more preferable than writing files directly to the slapd.d database.",
+  "dependencies": [
+  ]
+}

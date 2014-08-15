@@ -87,7 +87,7 @@ Puppet::Type.type(:ldapdn).provide :ldapdn do
         if resource[:remote_ldap]
           command = [command(cmd), "-H", "ldap://#{resource[:remote_ldap]}", "-d", "0", "-f", ldif_file]
         else
-          command = [command(cmd), "-H", "ldapi:///#{resource[:ldapi]}", "-d", "0", "-f", ldif_file]
+          command = [command(cmd), "-H", "ldapi:///", "-d", "0", "-f", ldif_file]
         end
         command += resource[:auth_opts] || ["-QY", "EXTERNAL"]
         Puppet.debug("\n\n" + File.open(ldif_file, 'r') { |file| file.read })
