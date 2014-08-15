@@ -4,9 +4,9 @@ require 'tempfile'
 Puppet::Type.type(:ldapdn).provide :ldapdn do
   desc ""
 
-  commands :ldapmodifycmd => "/usr/bin/ldapmodify"
-  commands :ldapaddcmd => "/usr/bin/ldapadd"
-  commands :ldapsearchcmd => "/usr/bin/ldapsearch"
+  commands :ldapmodifycmd => "ldapmodify"
+  commands :ldapaddcmd => "ldapadd"
+  commands :ldapsearchcmd => "ldapsearch"
 
   def create()
     ldap_apply_work
