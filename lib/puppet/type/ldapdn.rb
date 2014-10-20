@@ -45,6 +45,7 @@ Puppet::Type.newtype(:ldapdn) do
 
   newparam(:dn) do
     desc "Specify the value of the attribute you want to ldapmodify"
+    defaultto { @resource[:name] }
   end
 
   newparam(:auth_opts) do
