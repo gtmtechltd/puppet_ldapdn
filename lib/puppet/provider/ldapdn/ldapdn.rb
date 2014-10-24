@@ -24,11 +24,11 @@ Puppet::Type.type(:ldapdn).provide :ldapdn do
     # However, as I want to still use the ensure() param, I will have to live within its rules
 
     if @work_to_do.empty?
-      true if resource[:ensure] == :present
-      false if resource[:ensure] == :absent
+      return true if resource[:ensure] == :present
+      return false if resource[:ensure] == :absent
     else
-      false if resource[:ensure] == :present
-      true if resource[:ensure] == :absent
+      return false if resource[:ensure] == :present
+      return true if resource[:ensure] == :absent
     end
 
   end
