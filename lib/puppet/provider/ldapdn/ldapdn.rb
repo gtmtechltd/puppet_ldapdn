@@ -36,11 +36,18 @@ Puppet::Type.type(:ldapdn).provide :ldapdn do
   def parse_attributes
 
     ldap_attributes = {}
-    Array(resource[:attributes]).each do |asserted_attribute|
-      key,value = asserted_attribute.split(':', 2)
-      ldap_attributes[key] = [] if ldap_attributes[key].nil?
-      ldap_attributes[key] << value.strip!
+    if resource[:attributes].class == Hash
+      resource[:attributes].each do |key,val|
+        ldap_attributes[key] = Array(val)
+      end
+    else
+      Array(resource[:attributes]).each do |asserted_attribute|
+        key,value = asserted_attribute.split(':', 2)
+        ldap_attributes[key] = [] if ldap_attributes[key].nil?
+        ldap_attributes[key] << value.strip!
+      end
     end
+
     ldap_attributes
 
   end
